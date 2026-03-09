@@ -1,0 +1,30 @@
+name: Checks for .py changes
+
+on:
+  workflow_call:
+    outputs:
+      any_changed:
+        description: "True if any Python files were changed"
+        value: ${{ jobs.check-for-py-changes.outputs.any_changed }}
+      changed_files:
+        description: "A space-separated list of changed Python files"
+        value: ${{ jobs.check-for-py-changes.outputs.changed_files }}
+
+jobs:
+  check-for-py-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.changed-python-files.outputs.any_changed }}
+      changed_files: ${{ steps.changed-python-files.outputs.all_changed_files }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed Python files
+        id: changed-python-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: "**/*.py"
+          separator: " "

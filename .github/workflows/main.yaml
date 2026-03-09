@@ -1,0 +1,32 @@
+name: Lint and Test on PR
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  branch_check:
+    uses: ./.github/workflows/branch_check_template.yaml
+
+  detect-py-changes:
+    uses: ./.github/workflows/detect_py_changes_template.yaml
+
+  lint:
+    needs: [branch_check, detect-py-changes]
+    if: needs.detect-py-changes.outputs.any_changed == 'true'
+    uses: ./.github/workflows/lint_template.yaml
+    with:
+      changed_files: ${{ needs.detect-py-changes.outputs.changed_files }}
+
+  # test:
+  #   needs: [lint, detect-py-changes]
+  #   if: needs.detect-py-changes.outputs.any_changed == 'true'
+  #   uses: ./.github/workflows/test_template.yaml
+
+  no-py-changes:
+    runs-on: ubuntu-latest
+    needs: detect-py-changes
+    if: needs.detect-py-changes.outputs.any_changed != 'true'
+    steps:
+      - name: Log no changes
+        run: echo "No Python files were changed in this pull request."

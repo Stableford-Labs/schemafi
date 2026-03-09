@@ -1,0 +1,27 @@
+name: Validate Branch Name
+
+on:
+  workflow_call:
+
+jobs:
+  validate-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract branch name
+        id: extract_branch
+        run: echo "branch_name=${GITHUB_HEAD_REF}" >> $GITHUB_OUTPUT
+
+      - name: Check branch name format
+        run: |
+          BRANCH_NAME="${{ steps.extract_branch.outputs.branch_name }}"
+          echo "Branch name: $BRANCH_NAME"
+
+          PATTERN='^(feature|bug|improvement)/[A-Z]+-[0-9]{1,5}/[a-z0-9][a-z0-9_-]*$'
+
+          if [[ ! "$BRANCH_NAME" =~ $PATTERN ]]; then
+            echo "Branch name '$BRANCH_NAME' does not follow the required format."
+            echo "Expected format: 'feature/XYZ-123/description', 'bug/XYZ-456/description', 'improvement/XYZ-456/description"
+            exit 1
+          else
+            echo "Branch name '$BRANCH_NAME' matches the required format."
+          fi
