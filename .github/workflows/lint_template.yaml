@@ -162,11 +162,11 @@ jobs:
             --arg color       "$COLOR" \
             -f /tmp/msg_payload.jq)
 
+          jq_exit=$?
+
           echo "jq exit: $jq_exit"
           echo "payload: $payload"
           cat /tmp/msg_payload.jq
-
-          jq_exit=$?
 
           if [ -z "$payload" ] || [ "$jq_exit" -ne 0 ]; then
             echo "jq failed to build payload"
