@@ -1,6 +1,10 @@
 name: Ruff, mypy on Changed Python Files
 
 on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
   workflow_call:
     inputs:
       changed_files:
