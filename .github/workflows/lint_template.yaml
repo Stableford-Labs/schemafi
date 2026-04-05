@@ -115,7 +115,7 @@ jobs:
           SHA: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
           RUN_NUMBER: ${{ github.run_number }}
-          TIMESTAMP: ${{ github.event.head_commit.timestamp }}
+          TIMESTAMP: ${{ github.event.head_commit.timestamp || github.event.pull_request.updated_at }}
           STATUS: ${{ steps.status.outputs.status }}
           COLOR: ${{ steps.status.outputs.color }}
           RUFF_FORMAT: ${{ steps.tools.outputs.ruff_format }}
@@ -142,7 +142,7 @@ jobs:
               ],
               footer: { text: "Run #\($run_number)" },
               timestamp: $timestamp
-            }]
+            } + (if $timestamp != "" then { timestamp: $timestamp } else {} end)]
           }
           EOF
 
