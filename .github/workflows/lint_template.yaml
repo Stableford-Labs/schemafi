@@ -64,7 +64,7 @@ jobs:
         run: |
           echo "ruff_format=${{ steps.ruff_format.outcome }}" >> $GITHUB_OUTPUT
           echo "ruff_check=${{ steps.ruff_check.outcome }}"   >> $GITHUB_OUTPUT
-          echo "mypy=${{ steps.mypy_check.outcome }}"         >> $GITHUB_OUTPUT
+          echo "mypy_check=${{ steps.mypy_check.outcome }}"   >> $GITHUB_OUTPUT
 
       - name: Fail if any lint errors
         if: |
@@ -103,7 +103,7 @@ jobs:
 
           echo "ruff_format=${format_icon} ${format_outcome}" >> $GITHUB_OUTPUT
           echo "ruff_check=${check_icon} ${check_outcome}"    >> $GITHUB_OUTPUT
-          echo "mypy=${mypy_icon} ${mypy_outcome}"            >> $GITHUB_OUTPUT
+          echo "mypy_check=${mypy_icon} ${mypy_outcome}"            >> $GITHUB_OUTPUT
 
       - name: send-chat-notification
         env:
