@@ -34,7 +34,7 @@ jobs:
         run: |
           uv run pytest ./tests -v \
           --json-report \
-          --json-report-file=/tmp/pytest_report.json \
+          --json-report-file=/tmp/unit_tests_report.json \
           -v 2>&1 | tee unit_tests_output.txt
         continue-on-error: true
 
