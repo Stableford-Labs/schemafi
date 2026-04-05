@@ -131,6 +131,11 @@ jobs:
           RUFF_CHECK: ${{ steps.tools.outputs.ruff_check }}
           MYPY_CHECK: ${{ steps.tools.outputs.mypy_check }}
         run: |
+          if [ -z "$URL" ]; then
+            echo "URL is empty — secret not resolved"
+            exit 1
+          fi
+
           cat > /tmp/msg_payload.jq << 'EOF'
           {
             username: "GitHub Lint Bot",
@@ -178,8 +183,6 @@ jobs:
             exit 1
           fi
 
-          echo "sending http_req"
-
           http_code=$(curl -s \
             -o /tmp/msg_body.txt \
             -w "%{http_code}" \
@@ -189,11 +192,8 @@ jobs:
 
           body=$(cat /tmp/msg_body.txt)
 
-          echo "Res code: $http_code"
-          echo "Res body: $body"
-
-          # if [ "$http_code" -lt 200 ] || [ "$http_code" -gt 299 ]; then
-          #   echo "Webhook failed with HTTP $http_code"
-          #   [ -n "$body" ] && echo "Response body: $body"
-          #   exit 1
-          # fi
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -gt 299 ]; then
+            echo "Webhook failed with HTTP $http_code"
+            [ -n "$body" ] && echo "Response body: $body"
+            exit 1
+          fi
