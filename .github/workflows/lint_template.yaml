@@ -6,6 +6,9 @@ on:
       changed_files:
         required: true
         type: string
+    secrets:
+      LINT_TEST_NOTIFICATION:
+        required: true
 
 jobs:
   ruff-isort-mypy:
@@ -31,23 +34,29 @@ jobs:
 
       - name: Run Ruff Check
         id: ruff_check
+        env:
+          CHANGED_FILES: ${{ inputs.changed_files }}
         run: |
-          echo "Running Ruff check on changed files: ${{ inputs.changed_files }}"
-          uv run ruff check ${{ inputs.changed_files }} --config pyproject.toml --verbose 2>&1 | tee ruff_check_output.txt
+          echo "Running Ruff check on changed files: $CHANGED_FILES"
+          uv run ruff check $CHANGED_FILES--config pyproject.toml --verbose 2>&1 | tee ruff_check_output.txt
         continue-on-error: true
 
       - name: Run Ruff Format
         id: ruff_format
+        env:
+          CHANGED_FILES: ${{ inputs.changed_files }}
         run: |
-          echo "Running Ruff format check on changed files: ${{ inputs.changed_files }}"
-          uv run ruff format --check ${{ inputs.changed_files }} 2>&1 | tee ruff_format_output.txt
+          echo "Running Ruff format check on changed files: $CHANGED_FILES"
+          uv run ruff format --check $CHANGED_FILES 2>&1 | tee ruff_format_output.txt
         continue-on-error: true
 
       - name: Run Mypy
         id: mypy_check
+        env:
+          CHANGED_FILES: ${{ inputs.changed_files }}
         run: |
-          echo "Running mypy on changed files: ${{ inputs.changed_files }}"
-          uv run mypy ${{ inputs.changed_files }} --config-file pyproject.toml 2>&1 | tee mypy_output.txt
+          echo "Running mypy on changed files: $CHANGED_FILES"
+          uv run mypy $CHANGED_FILES --config-file pyproject.toml 2>&1 | tee mypy_output.txt
         continue-on-error: true
 
       - name: Upload Linting Results
