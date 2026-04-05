@@ -74,12 +74,12 @@ jobs:
         run: exit 1
 
   notify:
-    name: Chat Notification
+    name: chat-notification
     runs-on: ubuntu-latest
     needs: [ruff-isort-mypy]
     if: always()
     steps:
-      - name: Set status metadata
+      - name: set-status-metadata
         id: status
         run: |
           if [ "${{ needs.ruff-isort-mypy.result }}" == "success" ]; then
@@ -90,7 +90,7 @@ jobs:
             echo "status=❌ Ruff/Mypy failed" >> $GITHUB_OUTPUT
           fi
 
-      - name: Resolve tool outcomes
+      - name: resolve-tool-outcomes
         id: tools
         run: |
           format_outcome="${{ needs.ruff-isort-mypy.outputs.ruff_format }}"
@@ -105,7 +105,7 @@ jobs:
           echo "ruff_check=${check_icon} ${check_outcome}"    >> $GITHUB_OUTPUT
           echo "mypy=${mypy_icon} ${mypy_outcome}"            >> $GITHUB_OUTPUT
 
-      - name: Send Chat notification
+      - name: send-chat-notification
         env:
           URL: ${{ secrets.LINT_TEST_NOTIFICATION }}
           ACTOR: ${{ github.actor }}
@@ -135,14 +135,15 @@ jobs:
             --arg ruff_format "$RUFF_FORMAT" \
             --arg ruff_check  "$RUFF_CHECK" \
             --arg mypy_check  "$MYPY_CHECK" \
-            --argjson color   "$COLOR" \
+            --arg color       "$COLOR" \
+            -f /tmp/discord_payload.jq)
             '{
               username: "GitHub Lint Bot",
               avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
               embeds: [{
                 title: "\($status) — \($repository)",
                 description: "**Branch:** `\($ref_name)`\n**Commit:** [`\($sha)`](\($server_url)/\($repository)/commit/\($sha))\n**Author:** \($actor)",
-                color: $color,
+                color: ($color | tonumber),
                 fields: [
                   { name: "ruff format", value: $ruff_format, inline: true },
                   { name: "ruff check",  value: $ruff_check,  inline: true },
