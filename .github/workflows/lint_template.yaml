@@ -150,7 +150,7 @@ jobs:
                 fields: [
                   { name: "ruff format", value: $ruff_format, inline: true },
                   { name: "ruff check",  value: $ruff_check,  inline: true },
-                  { name: "mypy",        value: $mypy,         inline: true },
+                  { name: "mypy",        value: $mypy_check,  inline: true },
                   {
                     name: "Lint results",
                     value: "[View artifact](\($server_url)/\($repository)/actions/runs/\($run_id))",
