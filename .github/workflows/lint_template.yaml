@@ -162,20 +162,24 @@ jobs:
             --arg color       "$COLOR" \
             -f /tmp/msg_payload.jq)
 
-          if [ $? -ne 0 ]; then
+          jq_exit=$?
+
+          if [ -z "$payload" ] || [ "$jq_exit" -ne 0 ]; then
             echo "jq failed to build payload"
             exit 1
           fi
 
-          response=$(curl -s -w "\n%{http_code}" -X POST "$URL" \
+          curl -s \
+            -o /tmp/msg_body.txt \
+            -w "%{http_code}" \
+            -X POST "$URL" \
             -H "Content-Type: application/json" \
-            -d "$payload")
+            -d "$payload" > /tmp/msg_code.txt
 
-          http_code="$response"
+          http_code=$(cat /tmp/msg_code.txt)
           body=$(cat /tmp/msg_body.txt)
 
           echo "Res code: $http_code"
-          echo "Res body: $body"
 
           if [ "$http_code" -lt 200 ] || [ "$http_code" -gt 299 ]; then
             echo "Webhook failed with HTTP $http_code"
