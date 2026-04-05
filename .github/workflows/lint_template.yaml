@@ -13,7 +13,7 @@ jobs:
     outputs:
       ruff_format: ${{ steps.outcomes.outputs.ruff_format }}
       ruff_check: ${{ steps.outcomes.outputs.ruff_check }}
-      mypy_check: ${{ steps.outcomes.outputs.mypy }}
+      mypy_check: ${{ steps.outcomes.outputs.mypy_check }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -103,7 +103,7 @@ jobs:
 
           echo "ruff_format=${format_icon} ${format_outcome}" >> $GITHUB_OUTPUT
           echo "ruff_check=${check_icon} ${check_outcome}"    >> $GITHUB_OUTPUT
-          echo "mypy_check=${mypy_icon} ${mypy_outcome}"            >> $GITHUB_OUTPUT
+          echo "mypy_check=${mypy_icon} ${mypy_outcome}"      >> $GITHUB_OUTPUT
 
       - name: send-chat-notification
         env:
