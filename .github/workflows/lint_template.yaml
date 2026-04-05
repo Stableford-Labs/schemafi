@@ -109,42 +109,70 @@ jobs:
           echo "ruff_check=${check_icon} ${check_outcome}"    >> $GITHUB_OUTPUT
           echo "mypy=${mypy_icon} ${mypy_outcome}"            >> $GITHUB_OUTPUT
 
-      - name: Send CHat notification
+      - name: Send Chat notification
         env:
-          LINT_TEST_NOTIFICATION: ${{ secrets.LINT_TEST_NOTIFICATION }}
+          URL: ${{ secrets.LINT_TEST_NOTIFICATION }}
+          ACTOR: ${{ github.actor }}
+          REF_NAME: ${{ github.ref_name }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_NUMBER: ${{ github.run_number }}
+          TIMESTAMP: ${{ github.event.head_commit.timestamp }}
+          STATUS: ${{ steps.status.outputs.status }}
+          COLOR: ${{ steps.status.outputs.color }}
+          RUFF_FORMAT: ${{ steps.tools.outputs.ruff_format }}
+          RUFF_CHECK: ${{ steps.tools.outputs.ruff_check }}
+          MYPY_CHECK: ${{ steps.tools.outputs.mypy_check }}
         run: |
-          curl -s -X POST "$LINT_TEST_NOTIFICATION" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "username": "GitHub Lint Bot",
-              "avatar_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-              "embeds": [{
-                "title": "${{ steps.status.outputs.status }} — ${{ github.repository }}",
-                "description": "**Branch:** `${{ github.ref_name }}`\n**Commit:** [`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})\n**Author:** ${{ github.actor }}",
-                "color": ${{ steps.status.outputs.color }},
-                "fields": [
+          payload=$(jq -n \
+            --arg status      "$STATUS" \
+            --arg repository  "$REPOSITORY" \
+            --arg ref_name    "$REF_NAME" \
+            --arg sha         "$SHA" \
+            --arg server_url  "$SERVER_URL" \
+            --arg actor       "$ACTOR" \
+            --arg run_id      "$RUN_ID" \
+            --arg run_number  "$RUN_NUMBER" \
+            --arg timestamp   "$TIMESTAMP" \
+            --arg ruff_format "$RUFF_FORMAT" \
+            --arg ruff_check  "$RUFF_CHECK" \
+            --arg mypy_check  "$MYPY_CHECK" \
+            --argjson color   "$COLOR" \
+            '{
+              username: "GitHub Lint Bot",
+              avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+              embeds: [{
+                title: "\($status) — \($repository)",
+                description: "**Branch:** `\($ref_name)`\n**Commit:** [`\($sha)`](\($server_url)/\($repository)/commit/\($sha))\n**Author:** \($actor)",
+                color: $color,
+                fields: [
+                  { name: "ruff format", value: $ruff_format, inline: true },
+                  { name: "ruff check",  value: $ruff_check,  inline: true },
+                  { name: "mypy",        value: $mypy,         inline: true },
                   {
-                    "name": "ruff format",
-                    "value": "${{ steps.tools.outputs.ruff_format }}",
-                    "inline": true
-                  },
-                  {
-                    "name": "ruff check",
-                    "value": "${{ steps.tools.outputs.ruff_check }}",
-                    "inline": true
-                  },
-                  {
-                    "name": "mypy check",
-                    "value": "${{ steps.tools.outputs.mypy }}",
-                    "inline": true
-                  },
-                  {
-                    "name": "Lint results",
-                    "value": "[View artifact](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})",
-                    "inline": false
+                    name: "Lint results",
+                    value: "[View artifact](\($server_url)/\($repository)/actions/runs/\($run_id))",
+                    inline: false
                   }
                 ],
-                "footer": { "text": "Run #${{ github.run_number }}" },
-                "timestamp": "${{ github.event.head_commit.timestamp }}"
+                footer: { text: "Run #\($run_number)" },
+                timestamp: $timestamp
               }]
-            }'
+            }')
+
+          response=$(curl -s -w "\n%{http_code}" -X POST "$URL" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+
+          echo "Res code: $http_code"
+          echo "Res body: $body"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -gt 299 ]; then
+            echo "Discord webhook failed with HTTP $http_code"
+            exit 1
+          fi
