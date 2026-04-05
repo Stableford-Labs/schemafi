@@ -166,13 +166,14 @@ jobs:
             -H "Content-Type: application/json" \
             -d "$payload")
 
-          http_code=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | head -n-1)
+          http_code="$response"
+          body=$(cat /tmp/discord_body.txt)
 
           echo "Res code: $http_code"
           echo "Res body: $body"
 
           if [ "$http_code" -lt 200 ] || [ "$http_code" -gt 299 ]; then
             echo "Discord webhook failed with HTTP $http_code"
+            [ -n "$body" ] && echo "Response body: $body"
             exit 1
           fi
