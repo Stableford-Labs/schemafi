@@ -164,14 +164,12 @@ jobs:
 
           jq_exit=$?
 
-          echo "jq exit: $jq_exit"
-          echo "payload: $payload"
-          cat /tmp/msg_payload.jq
-
           if [ -z "$payload" ] || [ "$jq_exit" -ne 0 ]; then
             echo "jq failed to build payload"
             exit 1
           fi
+
+          echo "sending http_req"
 
           http_code=$(curl -s \
             -o /tmp/msg_body.txt \
