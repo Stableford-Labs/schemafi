@@ -17,11 +17,13 @@ jobs:
     uses: ./.github/workflows/lint_template.yaml
     with:
       changed_files: ${{ needs.detect-py-changes.outputs.changed_files }}
+    secrets: inherit
 
-  # test:
-  #   needs: [lint, detect-py-changes]
-  #   if: needs.detect-py-changes.outputs.any_changed == 'true'
-  #   uses: ./.github/workflows/test_template.yaml
+  test:
+    needs: [lint, detect-py-changes]
+    if: needs.detect-py-changes.outputs.any_changed == 'true'
+    uses: ./.github/workflows/test_template.yaml
+    secrets: inherit
 
   no-py-changes:
     runs-on: ubuntu-latest
