@@ -25,5 +25,124 @@ dev = [
     "typing-extensions==4.15.0",
 ]
 
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+extend-select = [
+    "E501",    # Force line length checks
+    "I",
+    "ISC",     # Checks for implicit literal string concatenation (auto-fixable)
+    "TC",      # Rules around TYPE_CHECKING blocks
+    "G",       # flake8-logging-format rules
+    "LOG",     # flake8-logging rules, most of them autofixable
+    "PT",      # flake8-pytest-style rules
+    "TID25",   # flake8-tidy-imports rules
+    "E",       # pycodestyle rules
+    "W",       # pycodestyle rules
+    "PLW0120", # else clause on loop without a break statement; remove the else and dedent its contents
+    "PLW0127", # Self-assignment of variable
+    "PLW0128", # Redeclared variable {name} in assignment
+    "PLW0129", # Asserting on an empty string literal will never pass
+    "PLW0131", # Named expression used without context
+    "PLW0133", # Missing raise statement on exception
+    "PLW0177", # Comparing against a NaN value; use math.isnan instead
+    "PLW0211", # First argument of a static method should not be named {argument_name}
+    "PLW0245", # super call is missing parentheses
+    "PLW0406", # Module {name} imports itself
+    "PLW0602", # Using global for {name} but no assignment is done
+    "PLW0604", # global at module level is redundant
+    "PLW0642", # Reassigned {} variable in {method_type} method
+    "PLW0711", # Exception to catch is the result of a binary and operation
+    "PLW1501", # {mode} is not a valid mode for open
+    "PLW1507", # Shallow copy of os.environ via copy.copy(os.environ)
+    "PLW1508", # Invalid type for environment variable default; expected str or None
+    "PLW1509", # preexec_fn argument is unsafe when using threads
+    "PLW1510", # subprocess.run without explicit check argument
+    "PLW1641", # Object does not implement __hash__ method
+    "PLW2101", # Threading lock directly created in with statement has no effect
+    "PLW2901", # Outer {outer_kind} variable {name} overwritten by inner {inner_kind} target
+    "PLW3301", # Nested {func} calls can be flattened
+    "RUF100",  # Unused noqa (auto-fixable)
+    "D1",
+    "D2",
+    "D213",    # Conflicts with D212.  Both can not be enabled.
+    "D3",
+    "D400",
+    "D401",
+    "D402",
+    "D403",
+    "D412",
+    "D419",
+    "PGH004",  # Use specific rule codes when using noqa
+    "PGH005",  # Invalid unittest.mock.Mock methods/attributes/properties
+    "S101",    # Checks use `assert` outside the test cases, test cases should be added into the exclusions
+    "SIM107",  # Don't use `return` in `try`-`except` and `finally`
+    "SIM300",  # Checks for conditions that position a constant on the left-hand side of the comparison
+    "B004",    # Checks for use of hasattr(x, "__call__") and replaces it with callable(x)
+    "B006",    # Checks for uses of mutable objects as function argument defaults.
+    "B007",    # Checks for unused variables in the loop
+    "B012",    # Checks for `break`, `continue`, and `return` statements in `finally` blocks
+    "B017",    # Checks for pytest.raises context managers that catch Exception or BaseException.
+    "B019",    # Use of functools.lru_cache or functools.cache on methods can lead to memory leaks
+    "B028",    # No explicit stacklevel keyword argument found
+    "TRY002",  # Prohibit use of `raise Exception`, use specific exceptions instead.
+    "RET505",  # Unnecessary {branch} after return statement
+    "RET506",  # Unnecessary {branch} after raise statement
+    "RET507",  # Unnecessary {branch} after continue statement
+    "RET508",  # Unnecessary {branch} after break statement
+]
+ignore = [
+    "D100",   # Unwanted; Docstring at the top of every file.
+    "D104",   # Unwanted; Docstring at the top of every `__init__.py` file.
+    "D107",   # Unwanted; Docstring in every constructor is unnecessary if the class has a docstring.
+    "E731",   # Do not assign a lambda expression, use a def
+    "TC003",  # Do not move imports from stdlib to TYPE_CHECKING block
+    "PT007",  # Wrong type of values in @pytest.mark.parametrize
+    "PT013",  # silly rule prohibiting e.g. `from pytest import param`
+    "PT019",  # fixture without value is injected as parameter, use @pytest.mark.usefixtures instead
+    "W191",
+    "E111",
+    "E114",
+    "E117",
+    "D206",
+    "D300",
+    "Q000",
+    "Q001",
+    "Q002",
+    "Q003",
+    "COM812",
+    "COM819",
+    "SIM105", # Use contextlib.suppress({exception}) instead of try-except-pass
+]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+
+known-first-party = ["schemafi"]
+
+[tool.mypy]
+mypy_path = "src"
+packages = ["schemafi"]
+namespace_packages = false
+exclude = ["^tests/", "^build/", "^dist/", "^setup\\.py$"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "--basetemp=/tmp/pytest_tmp"
+tmp_path_retention_policy = "none"
+tmp_path_retention_count = 0
